@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link rel="stylesheet" href="code/main.css">
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    var chart;
+    let memory = [];
+    let memorySize = -1;
+    google.charts.load('current', { 'packages': ['corechart'] }).then(() => {
+      chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+    })
+
+    function parseMemory(mem, baseArray, valuesArray, ticksArray) {
+      mem.sort((a, b) => a.start - b.start);
+
+      // empty the arrays
+      baseArray.length = 0;
+      valuesArray.length = 0;
+      ticksArray.length = 0;
+
+      baseArray.push("Genre");
+      valuesArray.push('');
+
+      mem.forEach(seg => {
+        baseArray.push(seg.name, { role: 'annotation' }, { role: 'tooltip' }, { role: 'style' });
+        ticksArray.push(seg.start);
+
+        let annotation = seg.name + "\n";
+        if (seg.type === "process")
+          annotation += "P" + seg.processId + "\n";
+        annotation += "start: " + seg.start + "\n";
+        annotation += "size: " + seg.size;
+
+        let style = "stroke-color: #6fc992;";
+        if (seg.type === "hole") style += "color: #9e9e9e;"
+        else if (seg.type === "old process") style += "color: #ab7b48;"
+        else if (seg.type === "process") style += "color: #4194ba;"
+
+        valuesArray.push(seg.size, seg.name, annotation, style);
+      })
+      ticksArray.push(memorySize);
+    }
+
+    function calculateHeight(mem) {
+      let minSegSize = Math.min(...mem.map(e => e.size));
+      let height = 500 * 0.1 * memorySize / minSegSize;
+      return height > 500 ? height : 500;
+    }
+
+    function drawChart(mem) {
+
+      let base = [];
+      let values = [];
+      let ticks = [];
+
+      parseMemory(mem, base, values, ticks);
+
+      var data = google.visualization.arrayToDataTable([base, values]);
+
+      var options = {
+        width: 600,
+        height: calculateHeight(mem),
+        legend: { position: 'none' },
+        bar: { groupWidth: '75%' },
+        isStacked: true,
+        colors: ["#ccc", "#999"],
+        vAxis: {
+          direction: -1,
+          textPosition: "out",
+          ticks: ticks,
+        },
+        chartArea: { top: 20, left: 100 },
+      };
+      chart.draw(data, options);
+    }
+  </script>
+  <meta charset="UTF-8">
+  <title>Memory Allocation</title>
+</head>
+
+<body>
+  <div id="main">
+    <div id="chart_div" style="visibility: hidden;"></div>
+    <div id="input_div">
+
+      <div id="memory-size-show-div">Memory Size: 0</div>
+      <hr>
+
+      <div>
+        <span>memory size</span>
+        <input type="text" id="memory-size" autofocus>
+        <span id="memory-size-error" class="error"></span>
+        <button id="make-new-memory">make new memory</button>
+      </div>
+
+
+      <div id="holes-count-div" style="display: none;">
+        <span>holes count</span>
+        <input type="text" id="holes-count-textbox">
+        <span id="holes-count-error-span" class="error"></span>
+      </div>
+
+
+      <div id="holes-div" style="display: none;">
+        <table id="holes-table"> </table>
+        <button id="holes-submit-button">submit holes</button>
+        <span id="holes-textboxes-error-span" class="error"></span>
+      </div>
+
+      <div id="allocate-or-deallocate-div" style="display: none;">
+        <label for="allocate-radio">allocate</label>
+        <input type="radio" name="allocat-or-deallocate" id="allocate-radio">
+        <label for="deallocate-radio">deallocate</label>
+        <input type="radio" name="allocat-or-deallocate" id="deallocate-radio">
+      </div>
+
+      <div id="allocation-method-div" style="display: none;">
+        <label for="first-fit-radio">first fit</label>
+        <input type="radio" name="allocation-method" id="first-fit-radio">
+        <label for="best-fit-radio">best fit</label>
+        <input type="radio" name="allocation-method" id="best-fit-radio">
+        <label for="worst-fit-radio">worst fit</label>
+        <input type="radio" name="allocation-method" id="worst-fit-radio">
+        <span id="allocation-method-error-span" class="error"></span>
+      </div>
+
+      <div id="process-id-div" style="display: none;">
+        <span>process id</span>
+        <input type="text" id="process-id-textbox">
+        <span id="process-id-error-span" class="error"></span>
+      </div>
+
+      <div id="segments-count-div" style="display: none;">
+        <span>segments count</span>
+        <input type="text" id="segments-count-textbox">
+        <span id="segment-count-error-span" class="error"></span>
+      </div>
+
+      <div id="segments-div" style="display: none;">
+        <table id="segments-table"> </table>
+        <span id="segments-textboxes-error-span" class="error"></span>
+        <button id="submit-segments-button">submit segments</button>
+      </div>
+
+      <div id="deallocate-div" style="display: none;">
+        <select id="deallocate-select"> </select>
+        <button id="submit-deallocate-button">deallocate</button>
+      </div>
+
+      <div id="result-error-div" class="error"></div>
+
+    </div>
+  </div>
+  <script src="code/sweetAlert.js"></script>
+  <script src="code/logic.js"></script>
+  <!-- <script src="code/testing/testing-initializing.js"></script>
+    <script src="code/testing/testing-allocation.js"></script>
+    <script src="code/testing/testing-deallocation.js"></script> -->
+  <script src="code/main.js"></script>
+
+  <!-- You can also require other files to run in this process -->
+  <script src="./renderer.js"></script>
+</body>
+
+</html>

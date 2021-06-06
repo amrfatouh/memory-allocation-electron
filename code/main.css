@@ -1,0 +1,46 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#main {
+  display: flex;
+}
+
+#chart_div {
+  width: 600px;
+}
+
+div {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.error {
+  color: red;
+}
+
+td {
+  width: 100px;
+  text-align: center;
+}
+td input {
+  width: 100%;
+}
+
+input[type="text"] {
+  width: 100px;
+  border-radius: 100px;
+  border: 1px solid #999;
+  outline: none;
+  padding: 3px 6px;
+  caret-color: #999;
+  text-align: center;
+}
+
+button {
+  border-radius: 100px;
+  border: 1px solid #999;
+  padding: 3px 6px;
+  cursor: pointer;
+}
